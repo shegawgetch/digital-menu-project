@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash; // ✅ Needed for password hashing
-use App\Models\User; // ✅ Model import
-use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use Illuminate\Http\Request; // ✅ Needed for password hashing
+use Illuminate\Support\Facades\Hash; // ✅ Model import
 
 class AuthController extends Controller
 {
@@ -72,14 +71,14 @@ class AuthController extends Controller
             'user' => $user,
         ]);
     }
+
     public function logout(Request $request)
-{
-    // Delete the current access token
-    $request->user()->currentAccessToken()->delete();
+    {
+        // Delete the current access token
+        $request->user()->currentAccessToken()->delete();
 
-    return response()->json([
-        'message' => 'Logged out successfully'
-    ]);
-}
-
+        return response()->json([
+            'message' => 'Logged out successfully',
+        ]);
+    }
 }

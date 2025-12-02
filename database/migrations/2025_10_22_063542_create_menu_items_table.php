@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('item_name');
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->decimal('price', 10, 2);
-            $table->decimal('tax_percentage', 5,2)->default(0);
-            $table->decimal('discount', 10,2)->default(0);
+            $table->decimal('tax_percentage', 5, 2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
             $table->string('photo')->nullable();
             $table->timestamps();
         });

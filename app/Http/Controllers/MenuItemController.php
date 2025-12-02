@@ -2,54 +2,64 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\MenuItemResource;
 use App\Models\MenuItem;
 use Illuminate\Http\Request;
-use App\Http\Resources\MenuItemResource;
 
 class MenuItemController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-    }
-
 public function index(Request $request)
 {
-    $query = MenuItem::with('category'); // eager load category
+    $user = $request->user(); // get logged-in user
 
-    // ✅ Filter by category if provided
-    if ($request->has('category_id') && $request->category_id != 'all') {
+    $query = MenuItem::with('category')
+        ->whereHas('category', function ($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
+
+    // Only trashed
+    if ($request->has('trashed') && $request->trashed) {
+        $query->onlyTrashed();
+    }
+
+    // Optional: filter by category
+    if ($request->has('category_id')) {
         $query->where('category_id', $request->category_id);
     }
 
     $menuItems = $query->get();
 
-    return response()->json($menuItems);
-}
+    // Map category name for frontend
+    $menuItems->transform(function ($item) {
+        $item->category_name = $item->category ? $item->category->name : 'Uncategorized';
+        return $item;
+    });
 
-
-   public function store(Request $request)
-{
-    $data = $request->validate([
-        'item_name' => 'required|string',
-        'category_id' => 'required|exists:categories,id',
-        'price' => 'required|numeric',
-        'tax_percentage' => 'nullable|numeric',
-        'discount' => 'nullable|numeric',
-        'photo' => 'nullable|image|max:2048',
+    return response()->json([
+        'data' => $menuItems
     ]);
-
-    if ($request->hasFile('photo')) {
-        $data['photo'] = $request->file('photo')->store('menu-items', 'public');
-    }
-
-    $menuItem = MenuItem::create($data);
-
-    // Return full resource with final_price and category_name
-    return new MenuItemResource($menuItem);
 }
 
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'item_name' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric',
+            'tax_percentage' => 'nullable|numeric',
+            'discount' => 'nullable|numeric',
+            'photo' => 'nullable|image|max:2048',
+        ]);
 
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('menu-items', 'public');
+        }
+
+        $menuItem = MenuItem::create($data);
+
+        // Return full resource with final_price and category_name
+        return new MenuItemResource($menuItem);
+    }
 
     public function show(MenuItem $menuItem)
     {
@@ -68,12 +78,33 @@ public function index(Request $request)
         ]);
 
         $menuItem->update($request->all());
+
         return new MenuItemResource($menuItem);
     }
+public function destroy(MenuItem $menuItem)
+{
+    // Soft delete only
+    $menuItem->delete();
 
-    public function destroy(MenuItem $menuItem)
+    return response()->json(['message' => 'Menu item moved to trash.'], 200);
+}
+
+public function restore($id)
+{
+    $item = MenuItem::onlyTrashed()->findOrFail($id);
+    $item->restore();
+    return response()->json(['message' => 'Menu item restored successfully']);
+}
+
+ public function forceDestroy($id)
     {
-        $menuItem->delete();
-        return response()->json(['message' => 'Menu item deleted successfully.'], 200);
+        $item = MenuItem::withTrashed()->find($id);
+
+        if (!$item) {
+            return response()->json(['message' => 'Item not found'], 404);
+        }
+
+        $item->forceDelete(); // This permanently removes it
+        return response()->json(['message' => 'Item permanently deleted']);
     }
 }

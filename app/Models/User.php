@@ -47,8 +47,9 @@ class User extends Authenticatable
             'password' => 'hashed', // ✅ Automatically hashes passwords
         ];
     }
-    public function menuItems() {
-    return $this->hasManyThrough(MenuItem::class, Category::class);
-}
 
+    public function menuItems()
+    {
+        return $this->hasManyThrough(MenuItem::class, Category::class);
+    }
 }

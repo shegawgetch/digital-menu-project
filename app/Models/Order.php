@@ -4,7 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;   // ✅ You missed this line
-use App\Models\User;                      // ✅ Needed for the relationship
+
+// ✅ Needed for the relationship
 
 class Order extends Model
 {

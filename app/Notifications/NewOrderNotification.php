@@ -2,10 +2,10 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\MailMessage;
 use App\Models\Order;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class NewOrderNotification extends Notification
 {
@@ -33,10 +33,10 @@ class NewOrderNotification extends Notification
     {
         return (new MailMessage)
             ->subject('New Order Received')
-            ->greeting('Hello ' . $notifiable->name . '!')
-            ->line('You have received a new order from ' . $this->order->customer_name . '.')
-            ->line('Total Price: $' . number_format($this->order->total_price, 2))
-            ->action('View Order', url('/orders/' . $this->order->id))
+            ->greeting('Hello '.$notifiable->name.'!')
+            ->line('You have received a new order from '.$this->order->customer_name.'.')
+            ->line('Total Price: '.number_format($this->order->total_price, 2))
+            ->action('View Order', url('/orders/'.$this->order->id))
             ->line('Thank you for using Digital Menu App!');
     }
 
@@ -49,7 +49,7 @@ class NewOrderNotification extends Notification
             'order_id' => $this->order->id,
             'customer_name' => $this->order->customer_name,
             'total_price' => $this->order->total_price,
-            'message' => 'New order received from ' . $this->order->customer_name,
+            'message' => 'New order received from '.$this->order->customer_name,
         ];
     }
 }

@@ -21,7 +21,7 @@ class MenuItemResource extends JsonResource
             'tax_percentage' => $tax,
             'discount' => $discount,
             'final_price' => $finalPrice,
-            'photo' => $this->photo ? url('storage/' . $this->photo) : null,
+            'photo' => $this->photo ? url('storage/'.$this->photo) : null,
         ];
     }
 }
