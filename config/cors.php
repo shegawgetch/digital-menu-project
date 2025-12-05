@@ -1,17 +1,11 @@
 <?php
 
-
-
 return [
-
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
-
+    'paths' => ['api/*'],
     'allowed_methods' => ['*'],
-
-    'allowed_origins' => ['*'],
-
+    'allowed_origins' => ['*'], // or your frontend URL: 'https://shegu-digital-menu.onrender.com'
     'allowed_headers' => ['*'],
-
-    'supports_credentials' => true,
-
+    'exposed_headers' => [],
+    'max_age' => 0,
+    'supports_credentials' => false, // ❌ false for token-based auth
 ];
