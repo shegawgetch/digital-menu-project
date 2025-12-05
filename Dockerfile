@@ -30,8 +30,12 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Set write permissions for Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache
 
+# Copy startup script and make it executable
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 # Expose the default Apache port
 EXPOSE 80
 
-# Start Apache
-CMD ["apache2-foreground"]
+# Start Apache via startup script
+CMD ["/start.sh"]
