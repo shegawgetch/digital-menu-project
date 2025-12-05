@@ -12,15 +12,22 @@ class CategoryController extends Controller
        // List all categories
 public function index(Request $request)
 {
-    $query = Category::query()->where('user_id', $request->user()->id);
+    $user = $request->user();
+    if (!$user) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
 
-    if ($request->has('trashed') && $request->trashed === 'true') {
-        $query->onlyTrashed();
+    $query = Category::where('user_id', $user->id);
+
+    if ($request->boolean('trashed')) { // cleaner way
+        $query = $query->onlyTrashed();
     }
 
     $categories = $query->latest()->get();
+
     return CategoryResource::collection($categories);
 }
+
 
     // Store a new category
     public function store(Request $request)
