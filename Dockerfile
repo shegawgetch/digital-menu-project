@@ -26,8 +26,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Set write permissions for Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Expose Render port
-EXPOSE 10000
+# Expose Apache port
+EXPOSE 80
 
 # Start Apache
 CMD ["apache2-foreground"]
