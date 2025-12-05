@@ -1,10 +1,11 @@
 # Use PHP 8.2 with Apache
 FROM php:8.2-apache
 
-# Install system dependencies
+# Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libzip-dev && \
-    docker-php-ext-install pdo pdo_pgsql zip
+    git unzip libpq-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_pgsql zip gd mbstring
 
 # Enable Apache rewrite
 RUN a2enmod rewrite
@@ -18,7 +19,7 @@ COPY . .
 # Install Composer inside container
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Install dependencies
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Set write permissions for Laravel
