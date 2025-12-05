@@ -13,6 +13,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         //
+        $middleware->cors([
+        'paths' => ['api/*', '*'],
+        'allowed_methods' => ['*'],
+        'allowed_origins' => ['*'],
+        'allowed_headers' => ['*'],
+        'exposed_headers' => [],
+        'max_age' => 0,
+        'supports_credentials' => false,
+    ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
