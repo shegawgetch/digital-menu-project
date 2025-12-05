@@ -4,7 +4,7 @@ FROM php:8.2-apache
 # Install system dependencies and PHP extensions
 RUN apt-get update && apt-get install -y \
     git unzip libpq-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
-    libonig-dev pkg-config && \
+    libonig-dev pkg-config build-essential && \
     docker-php-ext-configure gd --with-freetype --with-jpeg && \
     docker-php-ext-install pdo pdo_pgsql zip gd mbstring
 
