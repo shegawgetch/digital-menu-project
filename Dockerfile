@@ -1,8 +1,11 @@
 # Use PHP 8.2 with Apache
 FROM php:8.2-apache
 
+# Set working directory
+WORKDIR /var/www/html
+
 # Install system dependencies and PHP extensions
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     git unzip libpq-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
     libonig-dev pkg-config build-essential && \
     docker-php-ext-configure gd --with-freetype --with-jpeg && \
@@ -12,29 +15,28 @@ RUN apt-get update && apt-get install -y \
 # Enable Apache rewrite
 RUN a2enmod rewrite
 
-# Set working directory
-WORKDIR /var/www/html
-
 # Copy project files
 COPY . .
 
 # Set Apache DocumentRoot to Laravel public folder
-RUN sed -i 's|/var/www/html|/var/www/html/public|' /etc/apache2/sites-available/000-default.conf
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" /etc/apache2/sites-available/000-default.conf
 
-# Install Composer inside container
+# Install Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Set write permissions for Laravel
-RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# Copy startup script and make it executable
+# Copy startup script
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-# Expose the default Apache port
+# Expose port 80
 EXPOSE 80
 
 # Start Apache via startup script
