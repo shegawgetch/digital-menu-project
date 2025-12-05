@@ -18,6 +18,9 @@ WORKDIR /var/www/html
 # Copy project files
 COPY . .
 
+# Set Apache DocumentRoot to Laravel public folder
+RUN sed -i 's|/var/www/html|/var/www/html/public|' /etc/apache2/sites-available/000-default.conf
+
 # Install Composer inside container
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
