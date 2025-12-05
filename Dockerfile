@@ -1,33 +1,31 @@
-# Base image
+# Use PHP 8.2 with Apache
 FROM php:8.2-apache
 
-# Install system dependencies and PHP extensions
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libzip-dev libonig-dev \
-    && docker-php-ext-install pdo pdo_pgsql mbstring zip bcmath \
-    && a2enmod rewrite
+    git unzip libpq-dev libzip-dev && \
+    docker-php-ext-install pdo pdo_pgsql zip
+
+# Enable Apache rewrite
+RUN a2enmod rewrite
 
 # Set working directory
 WORKDIR /var/www/html
 
 # Copy project files
-COPY . /var/www/html
+COPY . .
 
-# Fix permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Install Composer
+# Install Composer inside container
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Install Laravel dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Cache Laravel config, routes, views
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+# Set write permissions for Laravel
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Expose port
+# Expose Render port
 EXPOSE 10000
 
-# Start Laravel server
-CMD php artisan serve --host 0.0.0.0 --port 10000
+# Start Apache
+CMD ["apache2-foreground"]
