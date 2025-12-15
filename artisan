@@ -1,0 +1,31 @@
+#!/usr/bin/env php
+<?php
+
+use Illuminate\Foundation\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+
+define('LARAVEL_START', microtime(true));
+
+// Register the Composer autoloader...
+require __DIR__.'/vendor/autoload.php';
+
+// Bootstrap Laravel
+/** @var Application $app */
+$app = require_once __DIR__.'/bootstrap/app.php';
+
+// --- WINDOWS PATCH FOR php artisan serve ---
+$input = new ArgvInput;
+if (PHP_SAPI === 'cli' && stripos(PHP_OS, 'WIN') !== false && $input->getFirstArgument() === 'serve') {
+    $host = '127.0.0.1';
+    $port = 8000;
+    $phpPath = PHP_BINARY; // current PHP executable
+    echo "Starting Laravel development server: http://$host:$port\n";
+    passthru("\"$phpPath\" -S $host:$port -t public");
+    exit(0);
+}
+// --- END PATCH ---
+
+// Handle other Artisan commands
+$status = $app->handleCommand($input);
+
+exit($status);
